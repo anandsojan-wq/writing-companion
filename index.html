@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LetterCraft - Class X</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #6c5ce7;
+            --bg-pattern: #a29bfe;
+            --glass-bg: #ffffff;
+            --text-main: #2d3436;
+            --btn-yellow: #f9d976;
+            --accent-green: #00b894;
+            --accent-red: #ff7675;
+            --shadow: 8px 8px 0 rgba(0,0,0,0.15);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 15%, transparent 15%);
+            background-size: 25px 25px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- Main Container --- */
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--glass-bg);
+            border: 3px solid var(--text-main);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+
+        /* --- Header --- */
+        .header {
+            background: #dfe6e9;
+            padding: 15px 25px;
+            border-bottom: 3px solid var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .brand { font-weight: 900; font-size: 20px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+        .back-btn { 
+            text-decoration: none; color: var(--text-main); font-weight: 700; font-size: 14px; 
+            border: 2px solid var(--text-main); padding: 5px 15px; border-radius: 50px; transition: 0.2s;
+        }
+        .back-btn:hover { background: var(--text-main); color: white; }
+
+        /* --- Progress Bar --- */
+        .progress-track {
+            background: #f1f2f6;
+            height: 10px;
+            width: 100%;
+            border-bottom: 3px solid var(--text-main);
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-green);
+            width: 20%; /* Starts at Q1 (20%) */
+            transition: width 0.5s ease;
+        }
+
+        /* --- Workspace (Split View) --- */
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            flex-direction: column; /* Mobile first */
+        }
+        @media (min-width: 768px) {
+            .workspace { flex-direction: row; }
+        }
+
+        /* Left Side: The Prompt/Task */
+        .task-panel {
+            flex: 1;
+            padding: 25px;
+            background: #fab1a0; /* Light Orange for Instructions */
+            border-bottom: 3px solid var(--text-main);
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            .task-panel { border-bottom: none; border-right: 3px solid var(--text-main); max-width: 35%; }
+        }
+
+        .task-tag {
+            background: var(--text-main); color: white; padding: 5px 10px; 
+            border-radius: 8px; font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 10px;
+        }
+        .task-title { font-weight: 800; font-size: 22px; margin-bottom: 10px; line-height: 1.3; }
+        .task-desc { font-size: 14px; line-height: 1.6; color: var(--text-main); }
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            border: 2px dashed var(--text-main);
+            border-radius: 12px;
+            font-size: 13px;
+            display: none; /* Hidden until AI replies */
+        }
+
+        /* Right Side: The Editor */
+        .editor-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            position: relative;
+        }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            border: none;
+            padding: 30px;
+            font-family: 'Courier Prime', monospace; /* Typewriter font */
+            font-size: 16px;
+            line-height: 1.8;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+            background-image: linear-gradient(#f1f2f6 1px, transparent 1px);
+            background-size: 100% 32px; /* Lined paper effect */
+        }
+
+        /* --- Footer Controls --- */
+        .controls {
+            padding: 15px 25px;
+            background: white;
+            border-top: 3px solid var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .word-count { font-size: 12px; font-weight: 700; color: #636e72; }
+
+        .btn-action {
+            background: var(--btn-yellow);
+            color: var(--text-main);
+            border: 2px solid var(--text-main);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--text-main);
+            transition: 0.1s;
+        }
+        .btn-action:active { transform: translateY(4px); box-shadow: none; }
+        
+        .btn-submit { background: var(--accent-green); color: white; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <div class="brand">📝 LetterCraft</div>
+            <a href="dashboard.html" class="back-btn">Exit</a>
+        </div>
+
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-bar"></div>
+        </div>
+
+        <div class="workspace">
+            
+            <div class="task-panel">
+                <span class="task-tag" id="level-badge">LEVEL 1: THE FIXER</span>
+                <h2 class="task-title" id="question-title">Fix the Salutation</h2>
+                <p class="task-desc" id="question-desc">
+                    The AI wrote a formal letter to the Editor, but it messed up the format. 
+                    <br><br>
+                    <b>Your Job:</b> Find the error in the text editor and fix it. Look closely at the date and salutation!
+                </p>
+
+                <div class="feedback-box" id="ai-feedback">
+                    🤖 <b>AI Tutor:</b> <span id="feedback-text">Waiting for your input...</span>
+                </div>
+            </div>
+
+            <div class="editor-panel">
+                <textarea id="letter-editor" spellcheck="false">
+The Editor,
+Hindustan Times,
+New Delhi.
+
+12/05/2024
+
+Dear Buddy,
+
+I am writing to express my concern regarding...</textarea>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="word-count">Words: <span id="word-count">24</span></div>
+            <button class="btn-action btn-submit" onclick="checkAnswer()">Check My Fix ➤</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: The 5 Questions ---
+        const levels = [
+            {
+                type: "fix",
+                title: "Fix the Format",
+                desc: "This is a Formal Letter to an Editor. The AI used a casual salutation ('Dear Buddy') and a wrong date format (slashes). Fix them to be formal.",
+                content: "The Editor,\nHindustan Times,\nNew Delhi.\n\n12/05/2024\n\nDear Buddy,\n\nI am writing to express my concern regarding..."
+            },
+            {
+                type: "fix",
+                title: "Tone Police",
+                desc: "The Subject Line is too long, and the opening sentence is too angry/informal. Rewrite them to be polite and concise.",
+                content: "Subject: I am very angry about the garbage on my street and you need to fix it now!\n\nSir,\n\nI want to scream at you because the municipal corporation is useless..."
+            },
+            {
+                type: "fix",
+                title: "The Closing",
+                desc: "Formal letters never end with 'Yours truly' or 'Love'. Replace the closing with the correct formal sign-off.",
+                content: "I hope the authorities will take appropriate action.\n\nYours truly,\n\nRahul Sharma"
+            },
+            {
+                type: "fix",
+                title: "Broken Body",
+                desc: "The body paragraph lacks connecting words. Add words like 'Therefore', 'However', or 'Moreover' to make it flow.",
+                content: "The roads are full of potholes. Accidents happen daily. The authorities have ignored our complaints. We need immediate repair."
+            },
+            {
+                type: "write",
+                title: "The Final Boss",
+                desc: "Write a Letter to the Editor (100-120 words) highlighting the issue of frequent power cuts in your area. Use the correct format.",
+                content: "" // Blank for final level
+            }
+        ];
+
+        let currentLevel = 0;
+        const editor = document.getElementById('letter-editor');
+        const title = document.getElementById('question-title');
+        const desc = document.getElementById('question-desc');
+        const badge = document.getElementById('level-badge');
+        const feedbackBox = document.getElementById('ai-feedback');
+        const feedbackText = document.getElementById('feedback-text');
+        const progressBar = document.getElementById('progress-bar');
+        const wordCount = document.getElementById('word-count');
+
+        // Update Word Count
+        editor.addEventListener('input', () => {
+            const words = editor.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+            wordCount.innerText = words;
+        });
+
+        // Load Level Function
+        function loadLevel(index) {
+            const level = levels[index];
+            title.innerText = level.title;
+            desc.innerText = level.desc;
+            editor.value = level.content;
+            
+            // Update Badge & Progress
+            if(level.type === 'fix') {
+                badge.innerText = `LEVEL ${index + 1}: THE FIXER`;
+                badge.style.background = "#2d3436";
+            } else {
+                badge.innerText = `LEVEL ${index + 1}: CREATOR MODE`;
+                badge.style.background = "#d63031"; // Red for boss level
+            }
+            
+            progressBar.style.width = `${(index + 1) * 20}%`;
+            
+            // Reset Feedback
+            feedbackBox.style.display = 'none';
+        }
+
+        // Mock "AI Check" Function (We will replace this with Real AI later)
+        function checkAnswer() {
+            const studentText = editor.value;
+            
+            // Show "Thinking" state
+            feedbackBox.style.display = 'block';
+            feedbackText.innerHTML = "Thinking... 🧠";
+
+            // Simulating AI Analysis Delay
+            setTimeout(() => {
+                if (currentLevel < 4) {
+                    // Logic for "Fix" Levels (Simple mock logic for now)
+                    feedbackText.innerHTML = "<b>Good job!</b> That looks much more formal. Let's move to the next challenge.";
+                    
+                    // Add a "Next Level" button in the feedback area
+                    feedbackText.innerHTML += `<br><button onclick="nextLevel()" style="margin-top:10px; background:white; border:1px solid black; padding:5px; cursor:pointer;">Next Level ➤</button>`;
+                } else {
+                    // Logic for "Final Boss"
+                    feedbackText.innerHTML = "<b>Letter Analyzed!</b> Format is correct. Body is slightly short. (This is where the real AI will rewrite your letter).";
+                }
+            }, 1000);
+        }
+
+        function nextLevel() {
+            if (currentLevel < levels.length - 1) {
+                currentLevel++;
+                loadLevel(currentLevel);
+            } else {
+                alert("You completed all levels!");
+            }
+        }
+
+        // Initialize
+        loadLevel(0);
+
+    </script>
+
+</body>
+</html>
