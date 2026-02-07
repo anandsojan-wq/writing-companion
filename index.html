@@ -14,6 +14,7 @@
             --btn-yellow: #f9d976;
             --accent-green: #00b894;
             --accent-purple: #a29bfe;
+            --accent-red: #ff7675;
             --shadow: 8px 8px 0 rgba(0,0,0,0.15);
         }
 
@@ -45,12 +46,16 @@
             display: flex; justify-content: space-between; align-items: center;
         }
         .brand { font-weight: 900; font-size: 20px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
-        .back-btn { 
-            text-decoration: none; color: var(--text-main); font-weight: 700; font-size: 14px; 
-            border: 2px solid var(--text-main); padding: 5px 15px; border-radius: 50px; 
-            transition: 0.2s;
+        
+        .header-actions { display: flex; gap: 10px; }
+        
+        .header-btn { 
+            text-decoration: none; color: var(--text-main); font-weight: 700; font-size: 13px; 
+            border: 2px solid var(--text-main); padding: 5px 12px; border-radius: 50px; 
+            transition: 0.2s; cursor: pointer; display: flex; align-items: center; gap: 5px; background: white;
         }
-        .back-btn:hover { background: var(--text-main); color: white; }
+        .header-btn:hover { background: var(--text-main); color: white; }
+        .btn-guide { background: var(--btn-yellow); }
 
         /* --- Progress Bar --- */
         .progress-track { background: #f1f2f6; height: 10px; width: 100%; border-bottom: 3px solid var(--text-main); }
@@ -97,10 +102,10 @@
 
         .controls {
             padding: 15px 25px; background: white; border-top: 3px solid var(--text-main);
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
         }
         
-        .btn-group { display: flex; gap: 10px; }
+        .btn-group { display: flex; gap: 10px; align-items: center; }
 
         .word-count { font-size: 12px; font-weight: 700; color: #636e72; }
         
@@ -112,26 +117,27 @@
         .btn-action:active { transform: translateY(4px); box-shadow: none; }
         .btn-action:disabled { background: #b2bec3; cursor: not-allowed; box-shadow: none; transform: none; }
         
-        /* New Auto Fix Button Style */
+        /* Button Variants */
         .btn-fix { background: var(--accent-purple); color: white; }
-
+        .btn-skip { background: white; color: var(--text-main); border-style: dashed; }
         .btn-next { background: var(--accent-green); color: white; display: none; margin-top: 10px; width: 100%; }
 
-        /* --- POPUP MODAL --- */
+        /* --- POPUP MODAL (GENERAL) --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); z-index: 1000;
-            display: flex; justify-content: center; align-items: center;
+            display: none; justify-content: center; align-items: center;
         }
-        .modal-box {
-            background: white; width: 90%; max-width: 400px; padding: 30px;
-            border-radius: 24px; border: 4px solid var(--text-main);
-            box-shadow: 10px 10px 0 rgba(0,0,0,0.2); text-align: center;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
-        .modal-title { font-size: 24px; font-weight: 900; margin-bottom: 15px; color: var(--text-main); }
+        .modal-box {
+            background: white; width: 90%; max-width: 450px; padding: 30px;
+            border-radius: 24px; border: 4px solid var(--text-main);
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.2); 
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 85vh; overflow-y: auto; /* Scrollable if content is long */
+        }
+        
+        .modal-title { font-size: 22px; font-weight: 900; margin-bottom: 15px; color: var(--text-main); text-transform: uppercase; }
         .modal-text { font-size: 14px; line-height: 1.6; color: #636e72; margin-bottom: 25px; text-align: left; }
         .btn-start {
             background: var(--accent-green); color: white; border: 2px solid var(--text-main);
@@ -139,6 +145,13 @@
             box-shadow: 4px 4px 0 var(--text-main);
         }
 
+        /* --- FORMAT GUIDE STYLES --- */
+        .guide-section { margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .guide-label { font-weight: 800; color: var(--text-main); display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; }
+        .guide-example { font-family: 'Courier Prime', monospace; font-size: 13px; color: #444; background: #f1f2f6; padding: 8px; border-radius: 6px; }
+        .example-letter { background: #fff8e1; padding: 15px; border: 2px solid var(--btn-yellow); border-radius: 12px; font-family: 'Courier Prime', monospace; font-size: 12px; white-space: pre-wrap; margin-top: 10px; }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid var(--text-main); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -146,23 +159,90 @@
 </head>
 <body>
 
-    <div class="modal-overlay" id="welcome-modal">
-        <div class="modal-box">
+    <div class="modal-overlay" id="welcome-modal" style="display: flex;">
+        <div class="modal-box" style="text-align: center;">
             <div class="modal-title">Writing Companion ✍️</div>
             <div class="modal-text">
                 <b>Master the Formal Letter (CBSE Class 10)</b><br><br>
                 1️⃣ <b>Levels 1-4 (The Fixer):</b> The AI will write a broken letter. You must fix the Format & Tone.<br>
                 2️⃣ <b>Level 5 (Final Boss):</b> Write a full letter from scratch based on a random topic.<br>
-                3️⃣ <b>New Feature:</b> Stuck? Click "Correct it for me" to see the perfect answer!
+                3️⃣ <b>New Tools:</b> Use the <b>"Format Guide"</b> button anytime to see the rules!
             </div>
-            <button class="btn-start" onclick="closeModal()">Start Learning ➤</button>
+            <button class="btn-start" onclick="closeModal('welcome-modal')">Start Learning ➤</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="guide-modal">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div class="modal-title" style="margin:0;">📖 CBSE Format Guide</div>
+                <button onclick="closeModal('guide-modal')" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            
+            <div class="modal-text" style="color: var(--text-main);">
+                <div class="guide-section">
+                    <span class="guide-label">1. Sender's Address</span>
+                    <div class="guide-example">123, Thalayolaparambu,<br>Kerala - 686146</div>
+                </div>
+                <div class="guide-section">
+                    <span class="guide-label">2. Date (Expanded Format)</span>
+                    <div class="guide-example">7 February 2026</div>
+                </div>
+                <div class="guide-section">
+                    <span class="guide-label">3. Receiver's Address</span>
+                    <div class="guide-example">The Principal / The Editor,<br>Institution Name,<br>City - Zipcode</div>
+                </div>
+                <div class="guide-section">
+                    <span class="guide-label">4. Subject & Salutation</span>
+                    <div class="guide-example"><b>Subject:</b> Complaint about... (5-8 words)<br><br>Respected Sir/Madam,</div>
+                </div>
+                <div class="guide-section">
+                    <span class="guide-label">5. Body Structure (3 Paras)</span>
+                    <ul style="padding-left:15px; margin:5px 0; font-size:12px;">
+                        <li><b>Para 1:</b> Introduction + Purpose</li>
+                        <li><b>Para 2:</b> Details, causes, effects</li>
+                        <li><b>Para 3:</b> Request action + Thanks</li>
+                    </ul>
+                </div>
+
+                <div class="guide-section" style="border:none;">
+                    <span class="guide-label">Example Letter:</span>
+                    <div class="example-letter">123, Thalayolaparambu,
+Kerala - 686146
+
+7 February 2026
+
+The Principal
+St. Mary's School
+Kottayam - 686001
+
+Subject: Complaint regarding poor bus service
+
+Respected Madam,
+
+I am Rahul K., a Class 10 student of your school. I am writing to highlight the irregular bus service affecting students.
+
+The buses arrive 30 minutes late daily, causing us to miss classes. Many students wait in remote areas without shelters. This has led to poor attendance and stress.
+
+I request you to improve timings and add more buses. Thanking you in anticipation.
+
+Yours sincerely,
+Rahul K.
+(Student, Class 10A)</div>
+                </div>
+                
+                <button class="btn-start" onclick="closeModal('guide-modal')">Close Guide</button>
+            </div>
         </div>
     </div>
 
     <div class="app-container" id="app-container" style="filter: blur(5px);">
         <div class="header">
             <div class="brand">📝 Writing Companion</div>
-            <a href="https://cbse-helper.vercel.app/" class="back-btn">Exit</a>
+            <div class="header-actions">
+                <button class="header-btn btn-guide" onclick="openModal('guide-modal')">📖 Format Guide</button>
+                <a href="https://cbse-helper.vercel.app/" class="header-btn">Exit</a>
+            </div>
         </div>
 
         <div class="progress-track">
@@ -184,7 +264,7 @@
             <div class="editor-panel">
                 <div class="loading-overlay" id="loading-overlay">
                     <span class="spinner"></span>
-                    <span>AI is thinking...</span>
+                    <span>AI is writing...</span>
                 </div>
                 <textarea id="letter-editor" spellcheck="false" placeholder="Start typing here..."></textarea>
             </div>
@@ -193,7 +273,8 @@
         <div class="controls">
             <div class="word-count">Words: <span id="word-count">0</span></div>
             <div class="btn-group">
-                <button class="btn-action btn-fix" id="fix-btn" onclick="autoFix()">✨ Correct it for me</button>
+                <button class="btn-action btn-skip" onclick="skipLevel()">Skip ⏭️</button>
+                <button class="btn-action btn-fix" id="fix-btn" onclick="autoFix()">✨ Correct it</button>
                 <button class="btn-action" id="check-btn" onclick="checkAnswer()">Check Answer ➤</button>
             </div>
         </div>
@@ -225,47 +306,45 @@
             "Frequent Power Cuts", "Complaint about Defective Mobile Phone", "Rash Driving by School Buses"
         ];
 
-        function closeModal() {
-            document.getElementById('welcome-modal').style.display = 'none';
-            document.getElementById('app-container').style.filter = 'none';
-            generateLevel();
+        // --- MODAL LOGIC ---
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+            if(id === 'welcome-modal') {
+                document.getElementById('app-container').style.filter = 'none';
+                generateLevel();
+            }
         }
 
         // --- GENERATOR LOGIC ---
         async function generateLevel() {
-            // UI Reset
             loadingOverlay.style.display = 'flex';
             feedbackBox.style.display = 'none';
             checkBtn.style.display = 'block';
-            fixBtn.style.display = 'block'; // Ensure fix button is visible
+            fixBtn.style.display = 'block';
             nextBtn.style.display = 'none';
             editor.value = ""; 
             
             const randomTopic = topics[Math.floor(Math.random() * topics.length)];
             currentTopic = randomTopic;
 
-            // --- LEVEL 5: FINAL BOSS ---
             if (currentLevel === 5) {
                 currentTaskType = "write";
                 badge.innerText = "LEVEL 5: FINAL BOSS";
                 badge.style.background = "#d63031"; 
                 title.innerText = "Write a Full Letter";
-                
-                desc.innerHTML = `<b>Topic:</b> ${randomTopic}<br><br>
-                <b>Scenario:</b> You are Rahul/Riya, living at 123, ABC Colony. Write a formal letter (100-120 words) to the Editor.<br><br>
-                <b>Format Checklist:</b> Sender Addr, Date, Receiver Addr, Subject, Salutation, Body, Closing.`;
-
-                editor.placeholder = "123, ABC Colony...\n\n7 February 2026\n\nThe Editor...\n\nSubject: ...";
+                desc.innerHTML = `<b>Topic:</b> ${randomTopic}<br>Write a formal letter (100-120 words) to the Editor.<br>Need help? Click <b>Format Guide</b> above!`;
+                editor.placeholder = "123, Thalayolaparambu...\n\n7 February 2026\n\nThe Editor...\n\nSubject: ...";
                 loadingOverlay.style.display = 'none'; 
-            
-            } 
-            // --- LEVELS 1-4: THE FIXER ---
-            else {
+            } else {
                 currentTaskType = "fix";
                 badge.innerText = `LEVEL ${currentLevel}: THE FIXER`;
                 badge.style.background = "#2d3436"; 
                 title.innerText = "Fix the Errors";
-                desc.innerText = `The AI just wrote a letter about '${randomTopic}', but it messed up the Format and Tone. Can you fix it?`;
+                desc.innerText = `The AI wrote a broken letter about '${randomTopic}'. Fix the format, date, and tone!`;
 
                 const systemPrompt = `You create 'Broken Letters'. TOPIC: ${randomTopic}.
                 Write a short formal letter body (40-50 words).
@@ -311,14 +390,14 @@
             let systemPrompt = "";
 
             if (currentTaskType === "write") {
-                systemPrompt = `You are a CBSE Class 10 Examiner.
+                systemPrompt = `You are a strict CBSE Class 10 Examiner.
                 TASK: Grade this Formal Letter about '${currentTopic}'.
-                CHECKLIST: Format, Content, Tone.
+                CHECKLIST: Format (Sender, Date, Receiver, Subject, Salutation), Content, Tone.
                 OUTPUT JSON: { "correct": true/false, "score": "X/5", "feedback": "Specific feedback." }`;
             } else {
                 systemPrompt = `Teacher Mode. TASK: Did the student fix the broken letter about '${currentTopic}'?
                 CHECK: Formal salutation? Formal date? Polite tone?
-                OUTPUT JSON: { "correct": true/false, "feedback": "Feedback." }`;
+                OUTPUT JSON: { "correct": true/false, "feedback": "Brief feedback." }`;
             }
 
             try {
@@ -364,21 +443,35 @@
             }
         }
 
-        // --- ✨ AUTO-FIX LOGIC ---
-        async function autoFix() {
-            if(!confirm("Are you sure? This will rewrite your letter to the perfect version.")) return;
+        // --- SKIP LOGIC ---
+        function skipLevel() {
+            if(confirm("Skip this question? You won't get a score for it.")) {
+                nextLevel();
+            }
+        }
 
+        function nextLevel() {
+            if (currentLevel < 5) {
+                currentLevel++;
+                generateLevel();
+            } else {
+                alert("🎉 Congratulations! You have completed the Formal Letter Course!");
+                location.href = "https://cbse-helper.vercel.app/";
+            }
+        }
+
+        // --- AUTO FIX LOGIC ---
+        async function autoFix() {
+            if(!confirm("Rewriting will replace your text. Continue?")) return;
             loadingOverlay.style.display = 'flex';
             loadingOverlay.querySelector('span').nextElementSibling.innerText = "AI is writing the perfect letter...";
             
-            // Context-aware prompt
             let systemPrompt = "";
             if(currentTaskType === "write") {
-                systemPrompt = `You are a CBSE Topper. Write a PERFECT Formal Letter (100-120 words) about '${currentTopic}'.
-                Follow strict CBSE format: Sender, Date, Receiver, Subject, Salutation, Body, Closing.`;
+                systemPrompt = `Write a PERFECT CBSE Formal Letter (100-120 words) about '${currentTopic}'.
+                Use: Sender (123, Thalayolaparambu...), Date (7 Feb 2026), Receiver (Principal/Editor), Subject.`;
             } else {
-                systemPrompt = `You are an Editor. Rewrite this broken letter about '${currentTopic}' to be FORMAL and POLITE.
-                Fix the date, salutation, and rude sentences.`;
+                systemPrompt = `Rewrite this broken letter about '${currentTopic}' to be FORMAL. Fix date, salutation, tone.`;
             }
 
             try {
@@ -400,25 +493,13 @@
                 loadingOverlay.style.display = 'none';
                 updateWordCount();
                 
-                // Show feedback message
                 feedbackBox.style.display = 'block';
                 feedbackBox.className = 'feedback-box success';
-                feedbackText.innerHTML = "✨ <b>Fixed!</b> Use this as a reference example. Click 'Check Answer' to proceed.";
+                feedbackText.innerHTML = "✨ <b>Fixed!</b> Study this example, then click Check Answer.";
 
             } catch (error) {
-                console.error(error);
                 loadingOverlay.style.display = 'none';
-                alert("Could not auto-fix. Check API connection.");
-            }
-        }
-
-        function nextLevel() {
-            if (currentLevel < 5) {
-                currentLevel++;
-                generateLevel();
-            } else {
-                alert("🎉 Congratulations! You have mastered the Formal Letter!");
-                location.href = "https://cbse-helper.vercel.app/";
+                alert("Error connecting to AI.");
             }
         }
 
