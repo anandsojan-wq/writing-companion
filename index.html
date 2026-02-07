@@ -13,7 +13,7 @@
             --text-main: #2d3436;
             --btn-yellow: #f9d976;
             --accent-green: #00b894;
-            --accent-red: #ff7675;
+            --accent-purple: #a29bfe;
             --shadow: 8px 8px 0 rgba(0,0,0,0.15);
         }
 
@@ -100,15 +100,21 @@
             display: flex; justify-content: space-between; align-items: center;
         }
         
+        .btn-group { display: flex; gap: 10px; }
+
         .word-count { font-size: 12px; font-weight: 700; color: #636e72; }
+        
         .btn-action {
             background: var(--btn-yellow); color: var(--text-main); border: 2px solid var(--text-main);
-            padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer;
+            padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer;
             box-shadow: 4px 4px 0 var(--text-main); transition: 0.1s;
         }
         .btn-action:active { transform: translateY(4px); box-shadow: none; }
         .btn-action:disabled { background: #b2bec3; cursor: not-allowed; box-shadow: none; transform: none; }
         
+        /* New Auto Fix Button Style */
+        .btn-fix { background: var(--accent-purple); color: white; }
+
         .btn-next { background: var(--accent-green); color: white; display: none; margin-top: 10px; width: 100%; }
 
         /* --- POPUP MODAL --- */
@@ -147,7 +153,7 @@
                 <b>Master the Formal Letter (CBSE Class 10)</b><br><br>
                 1️⃣ <b>Levels 1-4 (The Fixer):</b> The AI will write a broken letter. You must fix the Format & Tone.<br>
                 2️⃣ <b>Level 5 (Final Boss):</b> Write a full letter from scratch based on a random topic.<br>
-                3️⃣ <b>Infinite Practice:</b> Every question is unique!
+                3️⃣ <b>New Feature:</b> Stuck? Click "Correct it for me" to see the perfect answer!
             </div>
             <button class="btn-start" onclick="closeModal()">Start Learning ➤</button>
         </div>
@@ -178,7 +184,7 @@
             <div class="editor-panel">
                 <div class="loading-overlay" id="loading-overlay">
                     <span class="spinner"></span>
-                    <span>AI is writing a unique letter for you...</span>
+                    <span>AI is thinking...</span>
                 </div>
                 <textarea id="letter-editor" spellcheck="false" placeholder="Start typing here..."></textarea>
             </div>
@@ -186,12 +192,15 @@
 
         <div class="controls">
             <div class="word-count">Words: <span id="word-count">0</span></div>
-            <button class="btn-action" id="check-btn" onclick="checkAnswer()">Check Answer ➤</button>
+            <div class="btn-group">
+                <button class="btn-action btn-fix" id="fix-btn" onclick="autoFix()">✨ Correct it for me</button>
+                <button class="btn-action" id="check-btn" onclick="checkAnswer()">Check Answer ➤</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // ✅ YOUR NEW API KEY IS CONNECTED (WritingCompanion)
+        // ✅ YOUR API KEY
         const API_KEY = "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"; 
 
         // --- GLOBAL VARIABLES ---
@@ -206,6 +215,7 @@
         const feedbackBox = document.getElementById('ai-feedback');
         const feedbackText = document.getElementById('feedback-text');
         const checkBtn = document.getElementById('check-btn');
+        const fixBtn = document.getElementById('fix-btn');
         const nextBtn = document.getElementById('next-btn');
         const loadingOverlay = document.getElementById('loading-overlay');
 
@@ -227,53 +237,43 @@
             loadingOverlay.style.display = 'flex';
             feedbackBox.style.display = 'none';
             checkBtn.style.display = 'block';
+            fixBtn.style.display = 'block'; // Ensure fix button is visible
             nextBtn.style.display = 'none';
             editor.value = ""; 
             
-            // Pick Random Topic
             const randomTopic = topics[Math.floor(Math.random() * topics.length)];
             currentTopic = randomTopic;
 
-            // --- LEVEL 5: FINAL BOSS (WRITE FROM SCRATCH) ---
+            // --- LEVEL 5: FINAL BOSS ---
             if (currentLevel === 5) {
                 currentTaskType = "write";
                 badge.innerText = "LEVEL 5: FINAL BOSS";
-                badge.style.background = "#d63031"; // Red
+                badge.style.background = "#d63031"; 
                 title.innerText = "Write a Full Letter";
                 
                 desc.innerHTML = `<b>Topic:</b> ${randomTopic}<br><br>
-                <b>Scenario:</b> You are Rahul/Riya, living at 123, ABC Colony. Write a formal letter (100-120 words) to the Editor regarding the topic.<br><br>
-                <b>Strict Format Checklist:</b><br>
-                1. Sender's Address & Date<br>
-                2. Receiver's Address<br>
-                3. Subject & Salutation<br>
-                4. Body (3 Paras)<br>
-                5. Closing & Signature`;
+                <b>Scenario:</b> You are Rahul/Riya, living at 123, ABC Colony. Write a formal letter (100-120 words) to the Editor.<br><br>
+                <b>Format Checklist:</b> Sender Addr, Date, Receiver Addr, Subject, Salutation, Body, Closing.`;
 
                 editor.placeholder = "123, ABC Colony...\n\n7 February 2026\n\nThe Editor...\n\nSubject: ...";
-                loadingOverlay.style.display = 'none'; // No AI generation needed for instructions
+                loadingOverlay.style.display = 'none'; 
             
             } 
-            // --- LEVELS 1-4: THE FIXER (AI GENERATES BROKEN LETTER) ---
+            // --- LEVELS 1-4: THE FIXER ---
             else {
                 currentTaskType = "fix";
                 badge.innerText = `LEVEL ${currentLevel}: THE FIXER`;
-                badge.style.background = "#2d3436"; // Dark
+                badge.style.background = "#2d3436"; 
                 title.innerText = "Fix the Errors";
                 desc.innerText = `The AI just wrote a letter about '${randomTopic}', but it messed up the Format and Tone. Can you fix it?`;
 
-                // 🧠 AI CALL: CREATE BROKEN LETTER
-                const systemPrompt = `You are a helper that generates 'Broken Letters' for students to fix. 
-                TOPIC: ${randomTopic}.
-                
-                INSTRUCTIONS:
+                const systemPrompt = `You create 'Broken Letters'. TOPIC: ${randomTopic}.
                 Write a short formal letter body (40-50 words).
-                INTENTIONALLY INCLUDE THESE MISTAKES:
-                1. Use a very informal salutation (e.g., 'Dear Buddy', 'Hi Editor').
-                2. Use the wrong date format (e.g., '12/05/24').
-                3. Include one rude/angry sentence.
-                
-                OUTPUT ONLY THE LETTER TEXT. Do not add "Here is the letter".`;
+                INTENTIONALLY INCLUDE:
+                1. Informal Salutation (e.g., 'Dear Buddy').
+                2. Wrong Date (e.g., '12/05/24').
+                3. One rude sentence.
+                OUTPUT ONLY THE LETTER TEXT.`;
 
                 try {
                     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -282,20 +282,16 @@
                         body: JSON.stringify({
                             model: "llama-3.3-70b-versatile",
                             messages: [{ role: "system", content: systemPrompt }],
-                            temperature: 0.8 // High creativity for broken letters
+                            temperature: 0.8
                         })
                     });
                     const data = await response.json();
-                    
-                    if(data.error) throw new Error(data.error.message);
-                    
                     editor.value = data.choices[0].message.content;
                     loadingOverlay.style.display = 'none';
                     updateWordCount();
-
                 } catch (error) {
                     console.error(error);
-                    loadingOverlay.innerHTML = "<span style='color:red'>⚠️ AI Error. Check API Key.</span>";
+                    loadingOverlay.innerHTML = "<span style='color:red'>⚠️ AI Error.</span>";
                 }
             }
         }
@@ -303,51 +299,26 @@
         // --- CHECKER LOGIC ---
         async function checkAnswer() {
             const studentText = editor.value;
-
-            // 🚫 ANTI-RUBBISH CHECK
-            if(studentText.length < 10) {
-                alert("Please write something before checking!");
-                return;
-            }
+            if(studentText.length < 10) { alert("Please write something first!"); return; }
 
             checkBtn.innerText = "Grading...";
             checkBtn.disabled = true;
+            fixBtn.disabled = true;
             feedbackBox.style.display = 'block';
-            feedbackText.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:2px;"></span> Teacher is grading...';
+            feedbackText.innerHTML = '<span class="spinner"></span> Grading...';
             feedbackBox.className = 'feedback-box';
 
             let systemPrompt = "";
 
             if (currentTaskType === "write") {
-                // STRICT CBSE GRADING PROMPT (Level 5)
-                systemPrompt = `You are a strict CBSE Class 10 Examiner.
+                systemPrompt = `You are a CBSE Class 10 Examiner.
                 TASK: Grade this Formal Letter about '${currentTopic}'.
-                
-                CHECKLIST (Max 5 Marks):
-                1. Format (1 Mark): Sender Addr, Date, Receiver Addr, Subject, Salutation, Closing.
-                2. Content (2 Marks): Is the issue explained clearly?
-                3. Tone (1 Mark): Formal and polite?
-                
-                IMPORTANT: If the text is gibberish or spam, mark it as incorrect.
-
-                OUTPUT JSON ONLY:
-                {
-                    "correct": true/false, (True if letter is good)
-                    "score": "X/5",
-                    "feedback": "2-3 sentences of specific feedback."
-                }`;
+                CHECKLIST: Format, Content, Tone.
+                OUTPUT JSON: { "correct": true/false, "score": "X/5", "feedback": "Specific feedback." }`;
             } else {
-                // SIMPLE FIX CHECKER PROMPT (Levels 1-4)
-                systemPrompt = `Teacher Mode. 
-                TASK: The student tried to fix a broken letter about '${currentTopic}'.
-                
-                CHECK IF:
-                1. Salutation is now formal (Sir/Madam/Editor).
-                2. Date is now formal (e.g., 7 February 2026).
-                3. The rude sentence was removed/fixed.
-                4. The text makes sense (not gibberish).
-                
-                OUTPUT JSON ONLY: { "correct": true/false, "feedback": "Brief feedback on what they missed or got right." }`;
+                systemPrompt = `Teacher Mode. TASK: Did the student fix the broken letter about '${currentTopic}'?
+                CHECK: Formal salutation? Formal date? Polite tone?
+                OUTPUT JSON: { "correct": true/false, "feedback": "Feedback." }`;
             }
 
             try {
@@ -370,15 +341,15 @@
 
                 checkBtn.innerText = "Check Answer ➤";
                 checkBtn.disabled = false;
+                fixBtn.disabled = false;
 
                 if (result.correct === true) {
                     feedbackBox.className = 'feedback-box success';
                     const scoreText = result.score ? `<b>Score: ${result.score}</b><br>` : "";
                     feedbackText.innerHTML = `🎉 <b>Great Job!</b><br>${scoreText}${result.feedback}`;
                     checkBtn.style.display = 'none';
+                    fixBtn.style.display = 'none';
                     nextBtn.style.display = 'block';
-                    
-                    // Update Progress Bar
                     document.getElementById('progress-bar').style.width = `${currentLevel * 20}%`;
                 } else {
                     feedbackBox.className = 'feedback-box error';
@@ -388,9 +359,56 @@
 
             } catch (error) {
                 console.error(error);
-                checkBtn.innerText = "Retry";
-                checkBtn.disabled = false;
-                feedbackText.innerText = "Error connecting to AI. Check API Key.";
+                checkBtn.innerText = "Retry"; checkBtn.disabled = false; fixBtn.disabled = false;
+                feedbackText.innerText = "Connection Error.";
+            }
+        }
+
+        // --- ✨ AUTO-FIX LOGIC ---
+        async function autoFix() {
+            if(!confirm("Are you sure? This will rewrite your letter to the perfect version.")) return;
+
+            loadingOverlay.style.display = 'flex';
+            loadingOverlay.querySelector('span').nextElementSibling.innerText = "AI is writing the perfect letter...";
+            
+            // Context-aware prompt
+            let systemPrompt = "";
+            if(currentTaskType === "write") {
+                systemPrompt = `You are a CBSE Topper. Write a PERFECT Formal Letter (100-120 words) about '${currentTopic}'.
+                Follow strict CBSE format: Sender, Date, Receiver, Subject, Salutation, Body, Closing.`;
+            } else {
+                systemPrompt = `You are an Editor. Rewrite this broken letter about '${currentTopic}' to be FORMAL and POLITE.
+                Fix the date, salutation, and rude sentences.`;
+            }
+
+            try {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: `CURRENT TEXT:\n${editor.value}` }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+                
+                const data = await response.json();
+                editor.value = data.choices[0].message.content;
+                loadingOverlay.style.display = 'none';
+                updateWordCount();
+                
+                // Show feedback message
+                feedbackBox.style.display = 'block';
+                feedbackBox.className = 'feedback-box success';
+                feedbackText.innerHTML = "✨ <b>Fixed!</b> Use this as a reference example. Click 'Check Answer' to proceed.";
+
+            } catch (error) {
+                console.error(error);
+                loadingOverlay.style.display = 'none';
+                alert("Could not auto-fix. Check API connection.");
             }
         }
 
